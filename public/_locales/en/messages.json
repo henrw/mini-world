@@ -1,0 +1,10 @@
+{
+  "extensionDescription": {
+    "description": "A chrome extension that represents scroll position and user co-presence in a minimap.",
+    "message": "A chrome extension that represents scroll position and user co-presence in a minimap."
+  },
+  "extensionName": {
+    "description": "Mini Map",
+    "message": "Mini Map"
+  }
+}
