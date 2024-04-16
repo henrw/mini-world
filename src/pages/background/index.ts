@@ -2,12 +2,13 @@ import reloadOnUpdate from 'virtual:reload-on-update-in-background-script';
 import 'webextension-polyfill';
 
 import { initializeApp } from 'firebase/app';
-import { getFirestore, doc, updateDoc, deleteDoc, setDoc, collection, addDoc } from 'firebase/firestore';
+import { getFirestore, doc, updateDoc, deleteDoc, setDoc, getDocs, collection, addDoc } from 'firebase/firestore';
 // import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
 // import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-analytics.js";
 
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+
 const firebaseConfig = {
   apiKey: "AIzaSyCvKAbxzKERsbI9N1QIROSTUL4wvG-M0Lk",
   authDomain: "pax-scrollbar.firebaseapp.com",
@@ -37,60 +38,72 @@ async function addData() {
 let currPageDocID = null;
 let prevPageDocID = null;
 let userDocID = null;
+let currentTab = null;
+
 
 chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
   if (message.type === "CURSOR_POSITION") {
-    console.log("Cursor Position:", message.position);
-    chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
-      var currentTab = tabs[0];
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+      currentTab = tabs[0];
       const url = new URL(currentTab.url);
-      console.log(url);
       currPageDocID = url.hostname + url.pathname;
       currPageDocID = url.hostname.replace(/\./g, '_') + url.pathname.replace(/\//g, '_');
-      console.log(currPageDocID);
     });
 
-    console.log(
-      {
-        position: message.position
-      },
-      userDocID,
-      currPageDocID,
-      prevPageDocID
-    );
-    // Create unique user id
-    if (userDocID === null)
-    {
+    // Push data
+    if (userDocID === null) {
       const docRef = await addDoc(collection(db, currPageDocID), {
-        position: message.position
+        position: message.position,
+        avatarIdx: avatarIdx,
       });
 
       userDocID = docRef.id;
     }
-    else
-    {
+    else {
       // Delete record if user switch to another doc
-      if (currPageDocID !== prevPageDocID && prevPageDocID !== null)
-      {
+      if (currPageDocID !== prevPageDocID && prevPageDocID !== null) {
         // await deleteDoc(doc(db, prevPageDocID, userDocID));
         await setDoc(doc(db, currPageDocID, userDocID), {
           position: message.position
         });
       }
-      else
-      {
+      else {
         await updateDoc(doc(db, currPageDocID, userDocID), {
           position: message.position
         });
       }
 
-
       prevPageDocID = currPageDocID;
+    }
+
+    // Pull data
+    const pageCollectionRef = collection(db, currPageDocID);
+
+    try {
+      // Fetch the documents
+      const querySnapshot = await getDocs(pageCollectionRef);
+      const data = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        avatarIdx: doc.data().avatarIdx ?? 0,
+        position: doc.data().position,
+      }));
+      chrome.tabs.sendMessage(currentTab.id, { data: data });
+
+    } catch (error) {
+      console.error("Error fetching documents:", error);
+      throw error;
     }
   }
 });
 
-// addData();
+let avatarIdx = 0;
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.type === "CHANGE_AVATAR") {
+    // Assuming you have some way to store or handle the theme in background
+    avatarIdx = message.avatarIdx;  // Implement this function to handle theme change
+    console.log(`Avatar changed to: ${avatarIdx}`);
+  }
+});
 
 reloadOnUpdate('pages/background');
 

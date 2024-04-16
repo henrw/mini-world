@@ -1,44 +1,74 @@
 import React from 'react';
-import logo from '@assets/img/logo.svg';
+import avatar0 from '@assets/img/avatar0.svg';
+import avatar1 from '@assets/img/avatar1.svg';
+import avatar2 from '@assets/img/avatar2.svg';
+import avatar3 from '@assets/img/avatar3.svg';
+import avatar4 from '@assets/img/avatar4.svg';
+import avatar5 from '@assets/img/avatar5.svg';
 import '@pages/popup/Popup.css';
-import useStorage from '@src/shared/hooks/useStorage';
-import exampleThemeStorage from '@src/shared/storages/exampleThemeStorage';
-import withSuspense from '@src/shared/hoc/withSuspense';
-import withErrorBoundary from '@src/shared/hoc/withErrorBoundary';
+import { useState } from 'react';
 
 const Popup = () => {
-  const theme = useStorage(exampleThemeStorage);
+  const [avatarIdx, setAvatarIdx] = useState(0);
+  
+  function getRandomInt(min, max) {
+    min = Math.ceil(min);  // Ensure the minimum is rounded up to the nearest whole number
+    max = Math.floor(max); // Ensure the maximum is rounded down to the nearest whole number
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  const shuffleAvatar = () => {
+    const newAvatarIdx = getRandomInt(0, 5);
+    setAvatarIdx(newAvatarIdx);
+    chrome.runtime.sendMessage({
+      type: "CHANGE_AVATAR", avatarIdx: newAvatarIdx
+    });
+  };
 
   return (
     <div
       className="App"
       style={{
-        backgroundColor: theme === 'light' ? '#fff' : '#000',
+        backgroundColor: '#fff',
       }}>
-      <header className="App-header" style={{ color: theme === 'light' ? '#000' : '#fff' }}>
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/pages/popup/Popup.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{ color: theme === 'light' && '#0281dc', marginBottom: '10px' }}>
-          Learn React!
-        </a>
+      <header className="App-header" style={{ color: 'light' }}>
+        {
+          avatarIdx === 0 &&
+          <img src={avatar0} className="App-logo" alt="logo" />
+        }
+        {
+          avatarIdx === 1 &&
+          <img src={avatar1} className="App-logo" alt="logo" />
+        }
+        {
+          avatarIdx === 2 &&
+          <img src={avatar2} className="App-logo" alt="logo" />
+        }
+        {
+          avatarIdx === 3 &&
+          <img src={avatar3} className="App-logo" alt="logo" />
+        }
+        {
+          avatarIdx === 4 &&
+          <img src={avatar4} className="App-logo" alt="logo" />
+        }
+        {
+          avatarIdx === 5 &&
+          <img src={avatar5} className="App-logo" alt="logo" />
+        }
+
         <button
           style={{
-            backgroundColor: theme === 'light' ? '#fff' : '#000',
-            color: theme === 'light' ? '#000' : '#fff',
+            backgroundColor: '#fff',
+            color: "#000",
           }}
-          onClick={exampleThemeStorage.toggle}>
-          Toggle theme
+          onClick={shuffleAvatar}>
+          Shuffle
         </button>
       </header>
     </div>
   );
 };
 
-export default withErrorBoundary(withSuspense(Popup, <div> Loading ... </div>), <div> Error Occur </div>);
+export default Popup;
+// withErrorBoundary(withSuspense(Popup, <div> Loading ... </div>), <div> Error Occur </div>);

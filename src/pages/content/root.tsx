@@ -1,19 +1,32 @@
-// import { createRoot } from 'react-dom/client';
+import { createRoot } from 'react-dom/client';
 // import App from '@root/src/pages/content/Menu';
 import refreshOnUpdate from 'virtual:reload-on-update-in-view';
-// import injectedStyle from './injected.css?inline';
+import injectedStyle from './injected.css?inline';
 import { attachTwindStyle } from '@src/shared/style/twind';
+import Avatar from '@root/src/pages/content/Avatar';
+import MiniWorld from '@root/src/pages/content/MiniWorld';
 
 refreshOnUpdate('pages/content');
 
-let lastCursorPos = { x: 0, y: 0 };
 
-document.addEventListener('mousemove', (event) => {
-  lastCursorPos.x = event.clientX;
-  lastCursorPos.y = event.clientY;
-});
+const miniworld = document.createElement('div');
+miniworld.classList.add('minimap');
 
-setInterval(() => {
-  chrome.runtime.sendMessage({ type: "CURSOR_POSITION", position: lastCursorPos });
-  console.log("send")
-}, 5000);
+const rootIntoShadow = document.createElement('div');
+rootIntoShadow.id = 'shadow-root';
+
+const shadowRoot = miniworld.attachShadow({ mode: 'open' });
+shadowRoot.appendChild(rootIntoShadow);
+
+/** Inject styles into shadow dom */
+const styleElement = document.createElement('style');
+styleElement.innerHTML = injectedStyle;
+shadowRoot.appendChild(styleElement);
+attachTwindStyle(rootIntoShadow, shadowRoot);
+createRoot(rootIntoShadow).render(
+  <>
+  <MiniWorld />
+  </>
+);
+
+document.body.append(miniworld);
