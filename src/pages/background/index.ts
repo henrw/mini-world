@@ -39,6 +39,7 @@ let currPageDocID = null;
 let prevPageDocID = null;
 let userDocID = null;
 let currentTab = null;
+let keyPressed = false;
 
 
 chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
@@ -54,6 +55,7 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
     if (userDocID === null) {
       const docRef = await addDoc(collection(db, currPageDocID), {
         position: message.position,
+        scale: keyPressed? 10:1,
         avatarIdx: avatarIdx,
       });
 
@@ -64,12 +66,16 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
       if (currPageDocID !== prevPageDocID && prevPageDocID !== null) {
         // await deleteDoc(doc(db, prevPageDocID, userDocID));
         await setDoc(doc(db, currPageDocID, userDocID), {
-          position: message.position
+          position: message.position,
+          scale: keyPressed? 10:1,
+          avatarIdx: avatarIdx,
         });
       }
       else {
         await updateDoc(doc(db, currPageDocID, userDocID), {
-          position: message.position
+          position: message.position,
+          scale: keyPressed? 10:1,
+          avatarIdx: avatarIdx,
         });
       }
 
@@ -80,10 +86,10 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
     const pageCollectionRef = collection(db, currPageDocID);
 
     try {
-      // Fetch the documents
       const querySnapshot = await getDocs(pageCollectionRef);
       const data = querySnapshot.docs.map(doc => ({
         id: doc.id,
+        scale: doc.data().scale ?? 1,
         avatarIdx: doc.data().avatarIdx ?? 0,
         position: doc.data().position,
       }));
@@ -94,9 +100,18 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
       throw error;
     }
   }
+  else if (message.shiftKeyPressed === true) {
+    keyPressed = true;
+    console.log('Space key was pressed.');
+    // Handle space key press.
+  } else if (message.shiftKeyPressed === false) {
+    keyPressed = false;
+    console.log('Space key was released.');
+    // Handle space key release.
+  }
 });
 
-let avatarIdx = 0;
+let avatarIdx = 1;
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === "CHANGE_AVATAR") {
     // Assuming you have some way to store or handle the theme in background
@@ -115,48 +130,48 @@ reloadOnUpdate('pages/content/style.scss');
 
 console.log('background loaded');
 
-const openaiApiKey = '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';
+// const openaiApiKey = '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';
 
-chrome.storage.onChanged.addListener(function (changes, namespace) {
-  for (const [key, { oldValue, newValue }] of Object.entries(changes)) {
-    console.log(`Storage key "${key}" in namespace "${namespace}" changed.`);
-    console.log(`Old value was "${oldValue}", new value is "${newValue}".`);
-  }
-});
+// chrome.storage.onChanged.addListener(function (changes, namespace) {
+//   for (const [key, { oldValue, newValue }] of Object.entries(changes)) {
+//     console.log(`Storage key "${key}" in namespace "${namespace}" changed.`);
+//     console.log(`Old value was "${oldValue}", new value is "${newValue}".`);
+//   }
+// });
 
-let isOn = false;
+// let isOn = false;
 
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.action === 'fetchChatGPTResponse') {
-    (async () => {
-      const messages = [
-        {
-          role: 'system',
-          content: 'You are a helpful teaching assistant who tend to make wikipedia learning experience better.',
-        },
-        { role: 'user', content: request.question },
-      ];
-      try {
-        const response = await fetch('https://api.openai.com/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${openaiApiKey}`, // Ensure secure handling of your API key
-          },
-          body: JSON.stringify({
-            model: 'gpt-3.5-turbo',
-            messages: messages,
-          }),
-        });
+// chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+//   if (request.action === 'fetchChatGPTResponse') {
+//     (async () => {
+//       const messages = [
+//         {
+//           role: 'system',
+//           content: 'You are a helpful teaching assistant who tend to make wikipedia learning experience better.',
+//         },
+//         { role: 'user', content: request.question },
+//       ];
+//       try {
+//         const response = await fetch('https://api.openai.com/v1/chat/completions', {
+//           method: 'POST',
+//           headers: {
+//             'Content-Type': 'application/json',
+//             Authorization: `Bearer ${openaiApiKey}`, // Ensure secure handling of your API key
+//           },
+//           body: JSON.stringify({
+//             model: 'gpt-3.5-turbo',
+//             messages: messages,
+//           }),
+//         });
 
-        const data = await response.json();
-        console.log(data);
-        sendResponse({ success: true, response: data.choices[0].message.content }); // Adjust based on actual response structure
-      } catch (error) {
-        console.error('Error fetching from OpenAI:', error);
-        sendResponse({ success: false, error: error.toString() });
-      }
-    })();
-    return true; // Indicates you wish to send a response asynchronously.
-  }
-});
+//         const data = await response.json();
+//         console.log(data);
+//         sendResponse({ success: true, response: data.choices[0].message.content }); // Adjust based on actual response structure
+//       } catch (error) {
+//         console.error('Error fetching from OpenAI:', error);
+//         sendResponse({ success: false, error: error.toString() });
+//       }
+//     })();
+//     return true; // Indicates you wish to send a response asynchronously.
+//   }
+// });

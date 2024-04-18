@@ -1,0 +1,10 @@
+<svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <circle cx="40" cy="40" r="40" fill="url(#pattern0_3_5)"/>
+    <defs>
+    <pattern id="pattern0_3_5" patternContentUnits="objectBoundingBox" width="1" height="1">
+    <use xlink:href="#image0_3_5" transform="scale(0.000976562)"/>
+    </pattern>
+    <image id="image0_3_5" width="1024" height="1024" xlink:href="https://rapidprototype.s3.us-east-2.amazonaws.com/Subject.png" />
+    </defs>
+</svg>
+    

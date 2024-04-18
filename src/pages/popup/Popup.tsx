@@ -1,5 +1,5 @@
 import React from 'react';
-import avatar0 from '@assets/img/avatar0.svg';
+import avatar0 from '@assets/img/avatar-meta-0.svg';
 import avatar1 from '@assets/img/avatar1.svg';
 import avatar2 from '@assets/img/avatar2.svg';
 import avatar3 from '@assets/img/avatar3.svg';
@@ -18,7 +18,7 @@ const Popup = () => {
   }
 
   const shuffleAvatar = () => {
-    const newAvatarIdx = getRandomInt(0, 5);
+    const newAvatarIdx = (avatarIdx + 1) % 2
     setAvatarIdx(newAvatarIdx);
     chrome.runtime.sendMessage({
       type: "CHANGE_AVATAR", avatarIdx: newAvatarIdx
@@ -34,37 +34,21 @@ const Popup = () => {
       <header className="App-header" style={{ color: 'light' }}>
         {
           avatarIdx === 0 &&
-          <img src={avatar0} className="App-logo" alt="logo" />
+          <img src="https://rapidprototype.s3.us-east-2.amazonaws.com/Subject.png" alt="Circular Image" className="App-logo h-48 object-cover rounded-full overflow-hidden" />
         }
         {
           avatarIdx === 1 &&
-          <img src={avatar1} className="App-logo" alt="logo" />
-        }
-        {
-          avatarIdx === 2 &&
-          <img src={avatar2} className="App-logo" alt="logo" />
-        }
-        {
-          avatarIdx === 3 &&
-          <img src={avatar3} className="App-logo" alt="logo" />
-        }
-        {
-          avatarIdx === 4 &&
-          <img src={avatar4} className="App-logo" alt="logo" />
-        }
-        {
-          avatarIdx === 5 &&
-          <img src={avatar5} className="App-logo" alt="logo" />
+          <img src="https://rapidprototype.s3.us-east-2.amazonaws.com/Subject+2.png" alt="Circular Image" className="App-logo h-48 object-cover rounded-full overflow-hidden" />
         }
 
-        <button
+        {/* <button
           style={{
             backgroundColor: '#fff',
             color: "#000",
           }}
           onClick={shuffleAvatar}>
           Shuffle
-        </button>
+        </button> */}
       </header>
     </div>
   );
